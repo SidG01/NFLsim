@@ -1,0 +1,233 @@
+{
+    "team_name": "Bears",
+    "offense": [
+        {
+            "name": "QB",
+            "position": "QB",
+            "stats": {
+                "speed": 72,
+                "accuracy": 85,
+                "arm_strength": 80,
+                "decision_speed": 78,
+                "awareness": 82
+            }
+        },
+        {
+            "name": "WR1",
+            "position": "WR",
+            "stats": {
+                "speed": 91,
+                "route_running": 88,
+                "catching": 87,
+                "separation": 86
+            }
+        },
+        {
+            "name": "WR2",
+            "position": "WR",
+            "stats": {
+                "speed": 87,
+                "route_running": 82,
+                "catching": 83,
+                "separation": 80
+            }
+        },
+        {
+            "name": "WR3",
+            "position": "WR",
+            "stats": {
+                "speed": 84,
+                "route_running": 79,
+                "catching": 80,
+                "separation": 77
+            }
+        },
+        {
+            "name": "TE",
+            "position": "TE",
+            "stats": {
+                "speed": 76,
+                "route_running": 74,
+                "catching": 82,
+                "separation": 70,
+                "block": 75
+            }
+        },
+        {
+            "name": "RB",
+            "position": "RB",
+            "stats": {
+                "speed": 88,
+                "route_running": 72,
+                "catching": 76,
+                "carry": 84,
+                "elusiveness": 80
+            }
+        },
+        {
+            "name": "OL1",
+            "position": "OL",
+            "stats": {
+                "speed": 58,
+                "block": 85,
+                "strength": 88
+            }
+        },
+        {
+            "name": "OL2",
+            "position": "OL",
+            "stats": {
+                "speed": 57,
+                "block": 82,
+                "strength": 85
+            }
+        },
+        {
+            "name": "OL3",
+            "position": "OL",
+            "stats": {
+                "speed": 56,
+                "block": 86,
+                "strength": 90
+            }
+        },
+        {
+            "name": "OL4",
+            "position": "OL",
+            "stats": {
+                "speed": 57,
+                "block": 80,
+                "strength": 84
+            }
+        },
+        {
+            "name": "OL5",
+            "position": "OL",
+            "stats": {
+                "speed": 58,
+                "block": 83,
+                "strength": 87
+            }
+        }
+    ],
+    "defense": [
+        {
+            "name": "CB1",
+            "position": "CB",
+            "stats": {
+                "speed": 89,
+                "coverage": 86,
+                "zone_awareness": 80,
+                "instincts": 78
+            }
+        },
+        {
+            "name": "CB2",
+            "position": "CB",
+            "stats": {
+                "speed": 85,
+                "coverage": 81,
+                "zone_awareness": 77,
+                "instincts": 74
+            }
+        },
+        {
+            "name": "SS",
+            "position": "S",
+            "stats": {
+                "speed": 82,
+                "coverage": 78,
+                "zone_awareness": 84,
+                "instincts": 80,
+                "tackle": 82
+            }
+        },
+        {
+            "name": "FS",
+            "position": "S",
+            "stats": {
+                "speed": 84,
+                "coverage": 80,
+                "zone_awareness": 88,
+                "instincts": 82,
+                "tackle": 76
+            }
+        },
+        {
+            "name": "MLB",
+            "position": "LB",
+            "stats": {
+                "speed": 78,
+                "coverage": 72,
+                "zone_awareness": 80,
+                "instincts": 76,
+                "tackle": 88,
+                "pass_rush": 70
+            }
+        },
+        {
+            "name": "LOLB",
+            "position": "LB",
+            "stats": {
+                "speed": 80,
+                "coverage": 68,
+                "zone_awareness": 74,
+                "instincts": 72,
+                "tackle": 84,
+                "pass_rush": 78
+            }
+        },
+        {
+            "name": "ROLB",
+            "position": "LB",
+            "stats": {
+                "speed": 80,
+                "coverage": 68,
+                "zone_awareness": 74,
+                "instincts": 72,
+                "tackle": 84,
+                "pass_rush": 76
+            }
+        },
+        {
+            "name": "DL1",
+            "position": "DL",
+            "stats": {
+                "speed": 72,
+                "pass_rush": 88,
+                "strength": 90,
+                "tackle": 85
+            }
+        },
+        {
+            "name": "DL2",
+            "position": "DL",
+            "stats": {
+                "speed": 70,
+                "pass_rush": 84,
+                "strength": 88,
+                "tackle": 83
+            }
+        },
+        {
+            "name": "DL3",
+            "position": "DL",
+            "stats": {
+                "speed": 71,
+                "pass_rush": 86,
+                "strength": 89,
+                "tackle": 84
+            }
+        },
+        {
+            "name": "DL4",
+            "position": "DL",
+            "stats": {
+                "speed": 69,
+                "pass_rush": 82,
+                "strength": 87,
+                "tackle": 82
+            }
+        }
+    ]
+}
