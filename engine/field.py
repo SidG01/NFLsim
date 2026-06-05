@@ -2,8 +2,8 @@ import config
 
 class Field:
     def __init__(self):
-        self.total_yards   = config.FIELD_LENGTH_YARDS + (2 * config.END_ZONE_YARDS)
-        self.width_yards   = 53.3
+        self.total_yards = config.FIELD_LENGTH_YARDS + (2 * config.END_ZONE_YARDS)
+        self.width_yards = 53.3
 
         self.pixel_width   = config.FIELD_WIDTH
         self.pixel_height  = config.WINDOW_HEIGHT

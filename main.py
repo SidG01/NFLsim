@@ -22,9 +22,15 @@ def run_game():
             game.advance_quarter()
             if not game.game_over:
                 print(f"\n--- Quarter {game.quarter} ---\n")
-        
-        print(f"  [{current_possession:7}] {result['play_type']:12} | "
-            f"{result['yards_gained']:+3d} yds | "
+
+        display_type = result['play_type']
+        if outcome in ["punt", "field_goal", "missed_field_goal", "turnover_on_downs"]:
+            display_type = outcome
+        if outcome == "going_for_it":
+            outcome = "went_for_it"
+            
+        print(f"  [{current_possession:7}] {display_type:15} | "
+            f"{result['yards_gained']:+3d} yds -> "
             f"{outcome:20} | {game.get_hud_info()}")
 
     print(f"\nFINAL: OFF {game.score_offense} - DEF {game.score_defense}")
