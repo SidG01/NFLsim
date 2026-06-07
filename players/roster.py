@@ -4,7 +4,7 @@ from players.player import Player
 def load_roster(filepath):
     """
       from players.roster import load_roster
-      offense, defense = load_roster("players/teams/generic.json")
+      offense, defense = load_roster("players/teams/bears.json")
     """
     with open(filepath, "r") as f:
         data = json.load(f)
