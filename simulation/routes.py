@@ -83,26 +83,17 @@ def assign_routes(offense):
 
 
 def advance_route(player):
-    """
-    Called each frame. If the player has reached their current
-    waypoint, advance to the next one.
-
-    TODO:
-    - Check if player has route_waypoints attribute
-    - Check if player.route_index < len(player.route_waypoints)
-    - If the player is close enough to current waypoint
-      (within ~5 pixels), increment player.route_index
-    - Set player.target_x, player.target_y to the next waypoint
-    - If no more waypoints, player stays at final position
-    """
     if not hasattr(player, 'route_waypoints') or not player.route_waypoints:
         return
-        
+
+    if player.route_index >= len(player.route_waypoints):
+        return
+
     current_waypoint = player.route_waypoints[player.route_index]
     dist = math.sqrt((player.x - current_waypoint[0])**2 + 
-                    (player.y - current_waypoint[1])**2)
+                     (player.y - current_waypoint[1])**2)
 
-    if dist < 5:  # Within 5 pixels — close enough
+    if dist < 5:
         player.route_index += 1
         if player.route_index < len(player.route_waypoints):
             player.target_x, player.target_y = player.route_waypoints[player.route_index]

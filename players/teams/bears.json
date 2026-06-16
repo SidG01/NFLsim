@@ -154,18 +154,6 @@
             }
         },
         {
-            "name": "MLB",
-            "position": "LB",
-            "stats": {
-                "speed": 78,
-                "coverage": 72,
-                "zone_awareness": 80,
-                "instincts": 76,
-                "tackle": 88,
-                "pass_rush": 70
-            }
-        },
-        {
             "name": "LOLB",
             "position": "LB",
             "stats": {
@@ -175,6 +163,18 @@
                 "instincts": 72,
                 "tackle": 84,
                 "pass_rush": 78
+            }
+        },
+        {
+            "name": "MLB",
+            "position": "LB",
+            "stats": {
+                "speed": 78,
+                "coverage": 72,
+                "zone_awareness": 80,
+                "instincts": 76,
+                "tackle": 88,
+                "pass_rush": 70
             }
         },
         {
