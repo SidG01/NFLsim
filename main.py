@@ -1,6 +1,7 @@
 # main.py
 import sys
 import random
+import math
 import pygame
 import config
 from engine.game import GameState
@@ -11,6 +12,7 @@ from simulation.routes import assign_routes, advance_route
 from simulation.movement import move_all_players
 from visuals.field_renderer import FieldRenderer
 from visuals.animator import Animator
+from agents.defense import DefensiveAI
 
 def run():
     pygame.init()
@@ -23,53 +25,82 @@ def run():
     renderer = FieldRenderer(screen)
     animator = Animator(screen)
     game = GameState()
+    defensive_ai = DefensiveAI()
+    game_log = []
 
     total_frames_per_play = int(config.FPS * config.PLAY_DURATION_SECONDS)
 
-    throw_start = None
-    throw_end = None
+    throw_start    = None
+    throw_end      = None
     throw_progress = 0.0
-    throwing = False
+    throwing       = False
 
-    def update_defense(offense, defense):
+    def log_play(possession, display_type, yards, outcome, hud):
+        entry_type = "normal"
+        if outcome == "touchdown":          entry_type = "touchdown"
+        elif outcome == "turnover":         entry_type = "turnover"
+        elif outcome == "turnover_on_downs":entry_type = "turnover"
+        elif outcome == "field_goal":       entry_type = "field_goal"
+        elif outcome == "punt":             entry_type = "punt"
+        elif outcome == "safety":           entry_type = "safety"
+
+        text = f"[{possession[:3].upper()}] {display_type:<14} {yards:+3d}yd  {outcome}"
+        game_log.append({'text': text, 'type': entry_type})
+
+    def assign_blocking(offense, defense):
+        """
+        Assign each OL a blocking target from DL/blitzers.
+        Called once per play at setup.
+        """
+        ol      = [p for p in offense if p.position == "OL"]
+        rushers = [p for p in defense if getattr(p, 'coverage_type', '')
+                   in ('rush', 'blitz')]
+        for i, lineman in enumerate(ol):
+            if i < len(rushers):
+                lineman.block_target = rushers[i]
+            else:
+                lineman.block_target = None
+
+    def update_blocking(offense, defense):
+        """
+        OL steps toward their assigned rusher each frame.
+        If close enough, slows the rusher down.
+        """
         qb = next((p for p in offense if p.position == "QB"), None)
-        wrs = [p for p in offense if p.position == "WR"]
-        cbs = [p for p in defense if p.position == "CB"]
+        for p in offense:
+            if p.position != "OL":
+                continue
+            target = getattr(p, 'block_target', None)
+            if not target or not qb:
+                continue
+            # Move OL between QB and rusher
+            p.target_x = (target.x + qb.x) / 2
+            p.target_y = (target.y + qb.y) / 2
 
-        # CBs follow their assigned WR
-        for i, cb in enumerate(cbs):
-            if i < len(wrs):
-                cb.target_x = wrs[i].x
-                cb.target_y = wrs[i].y
-
-        # DL rushes toward QB
-        if qb:
-            for p in defense:
-                if p.position == "DL":
-                    p.target_x = qb.x
-                    p.target_y = qb.y
-
-        # LBs drift upfield slightly
-        for p in defense:
-            if p.position == "LB":
-                p.target_y -= 0.5
-
-        # Safeties drift toward midfield
-        for p in defense:
-            if p.position == "S":
-                p.target_y -= 0.3
+            # If OL is close to rusher, slow them down
+            dist = math.sqrt((p.x - target.x)**2 + (p.y - target.y)**2)
+            if dist < 25:
+                target.target_x = target.x + (target.x - qb.x) * 0.1
+                target.target_y = target.y + (target.y - qb.y) * 0.1
 
     def setup_play():
         nonlocal throw_start, throw_end, throw_progress, throwing
-        throw_start = None
-        throw_end = None
+        throw_start    = None
+        throw_end      = None
         throw_progress = 0.0
-        throwing = False
+        throwing       = False
         for p in offense + defense:
             p.reset_play_state()
         animator.set_player_positions(offense, defense, game)
         assign_routes(offense)
         animator.reset_play(offense + defense)
+
+        # Pick coverage and set up defenders
+        coverage    = defensive_ai.pick_coverage()
+        scrimmage_y = renderer._yard_to_y(game.yard_line)
+        defensive_ai.setup_coverage(offense, defense, scrimmage_y)
+        assign_blocking(offense, defense)
+        print(f"  Coverage: {coverage}")
 
     setup_play()
     frame_count = 0
@@ -79,25 +110,30 @@ def run():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    renderer.handle_click(event.pos)
 
         if frame_count < total_frames_per_play:
             for p in offense:
                 advance_route(p)
-            update_defense(offense, defense)
+            update_blocking(offense, defense)
+            defensive_ai.update_frame(offense, defense)
             move_all_players(offense + defense)
 
-            # Trigger throw at halfway point of the play
+            # Trigger throw at halfway point
             halfway = total_frames_per_play // 2
             if frame_count == halfway:
                 qb  = next((p for p in offense if p.position == "QB"), None)
                 wrs = [p for p in offense if p.position == "WR"]
                 if qb and wrs:
-                    target      = random.choice(wrs)
+                    target = random.choice(wrs)
                     throw_start = (int(qb.x), int(qb.y))
-                    throw_end   = (int(target.x), int(target.y))
-                    throwing    = True
+                    throw_end = (int(target.x), int(target.y))
+                    throwing = True
 
-            # Advance throw progress
             if throwing:
                 throw_progress = min(
                     throw_progress + (1.0 / (total_frames_per_play // 2)),
@@ -107,7 +143,6 @@ def run():
             frame_count += 1
 
         else:
-            # ── Play is over — calculate result ───────────────
             current_possession = game.possession
             if game.possession == "offense":
                 play   = Play(game, offense, defense)
@@ -122,9 +157,10 @@ def run():
                            "turnover_on_downs", "turnover"]:
                 display_type = outcome
 
+            log_play(current_possession, display_type, result['yards_gained'], outcome, game.get_hud_info())
             print(f"  [{current_possession:7}] {display_type:15} | "
-                  f"{result['yards_gained']:+3d} yds -> {outcome:20} | "
-                  f"{game.get_hud_info()}")
+                f"{result['yards_gained']:+3d} yds -> {outcome:20} | "
+                f"{game.get_hud_info()}")
 
             if game.check_advance_quarter():
                 game.advance_quarter()
@@ -134,8 +170,7 @@ def run():
             setup_play()
             frame_count = 0
 
-        # Draw everything
-        renderer.draw_all(game)
+        renderer.draw_all(game, game_log)
         animator.update_trails(offense)
         animator.draw_all(offense, defense, throw_start, throw_end, throw_progress)
         pygame.display.flip()

@@ -44,9 +44,89 @@ class FieldRenderer:
         self.C_ANAL_LINE = (30,  35,  70)
         self.C_ANAL_TITLE= (90, 150, 255)
 
+        # Add to __init__
+        self.show_log     = False
+        self.log_scroll   = 0
+        self.font_log     = pygame.font.SysFont("Courier New", 13)
+        self.font_btn     = pygame.font.SysFont("Arial", 14, bold=True)
+
+        # Button rect — stored so we can check clicks
+        self.log_btn_rect = pygame.Rect(
+            config.FIELD_WIDTH + 20,
+            config.WINDOW_HEIGHT - 80,
+            config.ANALYTICS_WIDTH - 40, 36)
+
     # ──────────────────────────────────────────────────────────────────────────
     # Internal helpers
     # ──────────────────────────────────────────────────────────────────────────
+
+    def draw_log_button(self):
+        color  = (50, 90, 200) if not self.show_log else (200, 60, 60)
+        label  = "SHOW GAME LOG" if not self.show_log else "HIDE GAME LOG"
+        pygame.draw.rect(self.screen, color, self.log_btn_rect, border_radius=6)
+        pygame.draw.rect(self.screen, (100, 140, 255), self.log_btn_rect, 2, border_radius=6)
+        text = self.font_btn.render(label, True, (255, 255, 255))
+        self.screen.blit(text, (
+            self.log_btn_rect.centerx - text.get_width() // 2,
+            self.log_btn_rect.centery - text.get_height() // 2
+        ))
+
+    def draw_game_log(self, log_entries):
+        """
+        Draw a scrollable game log overlay on the analytics panel.
+        log_entries is a list of dicts:
+        { 'text': str, 'type': str }
+        type can be: 'touchdown', 'turnover', 'score', 'normal',
+                    'quarter', 'field_goal', 'punt'
+        """
+        if not self.show_log:
+            return
+
+        # Colors per entry type
+        type_colors = {
+            "touchdown":   (80,  220, 100),
+            "turnover":    (220, 80,  80),
+            "field_goal":  (255, 200, 50),
+            "punt":        (180, 180, 180),
+            "quarter":     (100, 160, 255),
+            "safety":      (255, 120, 40),
+            "normal":      (200, 200, 200),
+            "score":       (255, 255, 100),
+        }
+
+        # Overlay background
+        ax = config.FIELD_WIDTH
+        aw = config.ANALYTICS_WIDTH
+        overlay = pygame.Surface((aw, config.WINDOW_HEIGHT - 100), pygame.SRCALPHA)
+        overlay.fill((8, 10, 25, 230))
+        self.screen.blit(overlay, (ax, 50))
+
+        # Title
+        title = self.font_btn.render("── GAME LOG ──", True, (100, 160, 255))
+        self.screen.blit(title, (ax + aw // 2 - title.get_width() // 2, 62))
+
+        pygame.draw.line(self.screen, (40, 50, 100),
+                        (ax + 10, 82), (ax + aw - 10, 82), 1)
+
+        # Draw log entries — most recent at bottom
+        line_h = 18
+        panel_h = config.WINDOW_HEIGHT - 160
+        max_lines = panel_h // line_h
+        visible = log_entries[-max_lines:] if len(log_entries) > max_lines else log_entries
+
+        y = 90
+        for entry in visible:
+            color = type_colors.get(entry.get('type', 'normal'), (200, 200, 200))
+            text  = self.font_log.render(entry['text'], True, color)
+            self.screen.blit(text, (ax + 12, y))
+            y += line_h
+
+    def handle_click(self, pos):
+        """Call this when a mouse click occurs. Returns True if log button was clicked."""
+        if self.log_btn_rect.collidepoint(pos):
+            self.show_log = not self.show_log
+            return True
+        return False
 
     def _yard_to_y(self, yard):
         """Convert a field-yard position to a screen y-coordinate."""
@@ -237,7 +317,7 @@ class FieldRenderer:
     # Master draw call
     # ──────────────────────────────────────────────────────────────────────────
 
-    def draw_all(self, game_state):
+    def draw_all(self, game_state, log_entries=None):
         self.draw_field()
         self.draw_end_zones()
         self.draw_yard_lines()
@@ -245,4 +325,7 @@ class FieldRenderer:
         self.draw_scrimmage_line(game_state.yard_line)
         self.draw_first_down_line(game_state.yard_line, game_state.yards_to_go)
         self.draw_analytics_bg()
+        self.draw_log_button()
+        if log_entries:
+            self.draw_game_log(log_entries)
         self.draw_hud(game_state)
